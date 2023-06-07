@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Barcode Detection Example</title>
+</head>
+<body>
+  <h1>Barcode Detection Example</h1>
+  <input type="file" accept="image/*" id="imageInput">
+  <br>
+  <div id="result"></div>
+
+  <script>
+    // Check browser compatibility
+    if (!("BarcodeDetector" in window)) {
+      console.log("Barcode Detector is not supported by this browser.");
+      alert("Barcode Detection is not supported by your browser.");
+    }
+
+    // Create new detector
+    const barcodeDetector = new BarcodeDetector({
+      formats: ["code_39", "codabar", "ean_13", "qr_code"]
+    });
+
+    // Handle file input change event
+    const imageInput = document.getElementById("imageInput");
+    imageInput.addEventListener("change", handleImageUpload);
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.onload = detectBarcodes.bind(null, img);
+    }
+
+    function detectBarcodes(image) {
+      barcodeDetector
+        .detect(image)
+        .then((barcodes) => {
+          const resultDiv = document.getElementById("result");
+          resultDiv.innerHTML = "";
+
+          if (barcodes.length === 0) {
+            resultDiv.innerHTML = "No barcodes detected.";
+          } else {
+            barcodes.forEach((barcode) => {
+              const p = document.createElement("p");
+              p.textContent = "Format: " + barcode.format + ", Value: " + barcode.rawValue;
+              resultDiv.appendChild(p);
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Error detecting barcodes.");
+        });
+    }
+  </script>
+</body>
+</html>
